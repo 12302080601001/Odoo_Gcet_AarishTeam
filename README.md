@@ -1,5 +1,5 @@
 
-# Human Resource Management System (HRMS)
+# Human Resource Management System 
 
 A comprehensive, modern HRMS built with Flask, Bootstrap, and SQLite. Features role-based access control, attendance tracking, leave management, and payroll management.
 
