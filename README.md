@@ -1,3 +1,4 @@
+
 # Human Resource Management System (HRMS)
 
 A comprehensive, modern HRMS built with Flask, Bootstrap, and SQLite. Features role-based access control, attendance tracking, leave management, and payroll management.
@@ -177,3 +178,4 @@ Built with ❤️ using Flask and Bootstrap
 3. Enable HTTPS
 4. Set debug=False
 5. Use a production WSGI server (Gunicorn/uWSGI)
+=======
