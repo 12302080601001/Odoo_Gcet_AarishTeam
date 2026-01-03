@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Email System - HRMS Communication{% endblock %}
+
+{% block extra_css %}
+<style>
+    .email-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 24px;
+        overflow: hidden;
+        min-height: 700px;
+        box-shadow: 0 4px 30px rgba(99, 102, 241, 0.08);
+    }
+
+    .email-sidebar {
+        background: rgba(99, 102, 241, 0.02);
+        border-right: 1px solid rgba(99, 102, 241, 0.1);
+        padding: 2rem;
+    }
+
+    .email-content {
+        padding: 2.5rem;
+    }
+
+    .compose-btn {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border: none;
+        font-weight: 700;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .compose-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .recipient-list {
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+
+    .recipient-item {
+        padding: 0.75rem;
+        border-radius: 12px;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border: 1px solid transparent;
+    }
+
+    .recipient-item:hover {
+        background: white;
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .recipient-item.selected {
+        background: rgba(99, 102, 241, 0.1);
+        border-color: #6366f1;
+    }
+
+    .recipient-avatar {
+        width: 35px;
+        height: 35px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: #64748b;
+    }
+
+    .email-form .form-control-custom {
+        background: #f8f9ff !important;
+        border-color: transparent !important;
+    }
+
+    .email-form .form-control-custom:focus {
+        background: white !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-5 animate-fade-up">
+    <h1 class="display-6 fw-bold text-dark">Communication Hub</h1>
+    <p class="text-muted">Broadcast official announcements and personal notifications via email.</p>
+</div>
+
+<div class="email-container animate-fade-up">
+    <div class="email-sidebar">
+        <button class="compose-btn"><i class="fas fa-pen me-2"></i> Compose Email</button>
+
+        <h6 class="text-muted small fw-bold mb-3 text-uppercase">Select Recipients</h6>
+        <div class="mb-3">
+            <input type="text" id="searchEmployees" class="form-control form-control-custom py-2"
+                style="font-size: 0.85rem;" placeholder="Search employees...">
+        </div>
+
+        <div class="recipient-list">
+            <div class="recipient-item" onclick="toggleAll()">
+                <div class="recipient-avatar" style="background: #6366f1; color: white;"><i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-bold" style="font-size: 0.85rem;">All Employees</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">Broadcast to all</small>
+                </div>
+            </div>
+
+            {% for e in employees %}
+            <div class="recipient-item employee-item" data-id="{{ e.id }}" onclick="toggleRecipient('{{ e.id }}')">
+                <div class="recipient-avatar">{{ e.profile.full_name[0] }}</div>
+                <div>
+                    <h6 class="mb-0 fw-bold" style="font-size: 0.85rem;">{{ e.profile.full_name }}</h6>
+                    <small class="text-muted" style="font-size: 0.75rem;">{{ e.profile.designation }}</small>
+                </div>
+                <input type="checkbox" name="recipients[]" value="{{ e.id }}" class="recipient-checkbox"
+                    style="display: none;">
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="email-content">
+        <form action="{{ url_for('send_email') }}" method="POST" class="email-form" id="emailSendForm">
+            <!-- Hidden inputs for recipients -->
+            <div id="selectedRecipientsContainer"></div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-muted">Subject</label>
+                <input type="text" name="subject" class="form-control form-control-custom py-3"
+                    style="font-size: 1.1rem; font-weight: 600;" placeholder="Enter email subject" required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label small fw-bold text-muted">Message Body</label>
+                <textarea name="body" class="form-control form-control-custom" rows="12"
+                    placeholder="Write your message here..." required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex gap-3">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" name="attach_report" id="attachReport">
+                        <label class="form-check-label small fw-bold text-muted" for="attachReport">Attach Monthly
+                            Report</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary-custom" style="padding: 0.75rem 2.5rem;">
+                    <i class="fas fa-paper-plane me-2"></i> Send Now
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function toggleRecipient(id) {
+        const item = document.querySelector(`.recipient-item[data-id="${id}"]`);
+        item.classList.toggle('selected');
+
+        updateRecipients();
+    }
+
+    function toggleAll() {
+        const allItems = document.querySelectorAll('.employee-item');
+        const isAllSelected = Array.from(allItems).every(i => i.classList.contains('selected'));
+
+        allItems.forEach(i => {
+            if (isAllSelected) i.classList.remove('selected');
+            else i.classList.add('selected');
+        });
+
+        updateRecipients();
+    }
+
+    function updateRecipients() {
+        const container = document.getElementById('selectedRecipientsContainer');
+        container.innerHTML = '';
+
+        const selected = document.querySelectorAll('.employee-item.selected');
+        selected.forEach(s => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'recipients[]';
+            input.value = s.getAttribute('data-id');
+            container.appendChild(input);
+        });
+    }
+
+    // Search functionality
+    document.getElementById('searchEmployees').addEventListener('input', function (e) {
+        const term = e.target.value.toLowerCase();
+        document.querySelectorAll('.employee-item').forEach(item => {
+            const name = item.querySelector('h6').textContent.toLowerCase();
+            const desc = item.querySelector('small').textContent.toLowerCase();
+            if (name.includes(term) || desc.includes(term)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

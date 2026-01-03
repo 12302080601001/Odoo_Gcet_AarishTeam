@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}World-Class HR Analytics - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .kpi-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+
+    .kpi-card {
+        background: rgba(30, 41, 59, 0.5);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        background: rgba(30, 41, 59, 0.7);
+        border-color: var(--primary-color);
+    }
+
+    .kpi-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .chart-container {
+        min-height: 350px;
+        position: relative;
+    }
+
+    .premium-badge {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 4px 10px;
+        border-radius: 50px;
+        background: rgba(99, 102, 241, 0.15);
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .trend-up {
+        color: #10b981;
+    }
+
+    .trend-down {
+        color: #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="gradient-text mb-0"><i class="fas fa-microchip me-2"></i> Strategic HR Analytics</h2>
+    <div class="text-muted small">Real-time data synchronization active <i class="fas fa-sync fa-spin ms-1"></i></div>
+</div>
+
+<!-- KPI Summary Row -->
+<div class="kpi-row animate-fade-up">
+    <div class="kpi-card">
+        <div class="premium-badge">Workforce</div>
+        <div class="h2 text-white mb-1">{{ total_staff | default(0) }}</div>
+        <div class="text-muted small">Active Employees <span class="trend-up"><i class="fas fa-arrow-up"></i> 12%</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="premium-badge">Finance</div>
+        <div class="h2 text-white mb-1">₹{{ "{:,.0f}".format((total_payroll | default(0)) / 1000) }}k</div>
+        <div class="text-muted small">Monthly Payroll <span class="trend-up"><i class="fas fa-arrow-up"></i> 5%</span>
+        </div>
+    </div>
+    <div class="kpi-card">
+        <div class="premium-badge">Operations</div>
+        <div class="h2 text-white mb-1">{{ pending_tasks | default(0) }}</div>
+        <div class="text-muted small">Pending Actions <span class="trend-down"><i class="fas fa-exclamation-circle"></i>
+                High</span></div>
+    </div>
+    <div class="kpi-card">
+        <div class="premium-badge">Performance</div>
+        <div class="h2 text-white mb-1">4.2/5</div>
+        <div class="text-muted small">Avg rating <span class="trend-up"><i class="fas fa-medal"></i> Premium</span>
+        </div>
+    </div>
+</div>
+
+<div class="analytics-grid">
+    <!-- Attendance Line Chart -->
+    <div class="glass-card p-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <h5 class="section-title mb-4"><i class="fas fa-chart-line gradient-text"></i> Attendance Velocity (Last 7 Days)
+        </h5>
+        <div class="chart-container">
+            <canvas id="attendanceLineChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Salary Bar Chart -->
+    <div class="glass-card p-4 animate-fade-up" style="animation-delay: 0.2s;">
+        <h5 class="section-title mb-4"><i class="fas fa-chart-bar gradient-text"></i> Departmental Salary Expenditure
+        </h5>
+        <div class="chart-container">
+            <canvas id="salaryBarChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Expense Pie Chart -->
+    <div class="glass-card p-4 animate-fade-up" style="animation-delay: 0.3s;">
+        <h5 class="section-title mb-4"><i class="fas fa-chart-pie gradient-text"></i> Expense Decomposition</h5>
+        <div class="chart-container">
+            <canvas id="expensePieChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Dept Doughnut Chart -->
+    <div class="glass-card p-4 animate-fade-up" style="animation-delay: 0.4s;">
+        <h5 class="section-title mb-4"><i class="fas fa-users-viewfinder gradient-text"></i> Human Capital Allocation
+        </h5>
+        <div class="chart-container">
+            <canvas id="deptDoughnutChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Performance Polar Area Chart -->
+    <div class="glass-card p-4 animate-fade-up col-lg-12" style="animation-delay: 0.5s;">
+        <h5 class="section-title mb-4"><i class="fas fa-star-half-stroke gradient-text"></i> Performance Rating Spectrum
+        </h5>
+        <div class="chart-container" style="max-height: 400px; display: flex; justify-content: center;">
+            <canvas id="performancePolarChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Metrics Table -->
+<div class="card-custom animate-fade-up" style="animation-delay: 0.6s;">
+    <div class="card-header-custom">
+        <h4 class="mb-0"><i class="fas fa-database gradient-text"></i> Granular Organizational Data</h4>
+    </div>
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Resource Count</th>
+                        <th>Avg. Net Worth</th>
+                        <th>Total Liabilities (Salary)</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in salary_stats %}
+                    <tr>
+                        <td><strong class="text-white">{{ s._id or 'General' }}</strong></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-primary me-2">{% for d in dept_stats %}{% if d._id == s._id %}{{
+                                    d.count }}{% endif %}{% endfor %}</span>
+                                <small class="text-muted">Users</small>
+                            </div>
+                        </td>
+                        <td class="text-info">₹{{ "{:,.0f}".format(s.avg | default(0)) }}</td>
+                        <td class="text-success">₹{{ "{:,.0f}".format(s.total | default(0)) }}</td>
+                        <td><span class="badge bg-success">Optimized</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Universal Chart.js Configuration
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+
+    // Data Preparation from Backend
+    const deptStats = {{ dept_stats | tojson | safe if dept_stats else '[]' }};
+    const salaryStats = {{ salary_stats | tojson | safe if salary_stats else '[]' }};
+    const attendanceStats = {{ attendance_stats | tojson | safe if attendance_stats else '[]' }};
+    const expenseStats = {{ expense_stats | tojson | safe if expense_stats else '[]' }};
+    const performanceStats = {{ performance_stats | tojson | safe if performance_stats else '[]' }};
+
+    // 1. Attendance Line Chart
+    new Chart(document.getElementById('attendanceLineChart'), {
+        type: 'line',
+        data: {
+            labels: attendanceStats.map(a => a._id),
+            datasets: [{
+                label: 'Present Ratio',
+                data: attendanceStats.map(a => a.count),
+                borderColor: '#00d2ff',
+                backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                fill: true,
+                tension: 0, // Sharp lines for tech look
+                borderWidth: 2,
+                pointBackgroundColor: '#00d2ff',
+                pointRadius: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.03)' }, beginAtZero: true },
+                x: { grid: { display: false } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // 2. Salary Bar Chart
+    new Chart(document.getElementById('salaryBarChart'), {
+        type: 'bar',
+        data: {
+            labels: salaryStats.map(s => s._id || 'Unknown'),
+            datasets: [{
+                data: salaryStats.map(s => s.total),
+                backgroundColor: ['#00d2ff', '#3a7bd5', '#004e92', '#10b981', '#ffffff'],
+                borderRadius: 0, // Sharp edges
+                barThickness: 25
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { grid: { color: 'rgba(255,255,255,0.03)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // 3. Expense Pie Chart
+    new Chart(document.getElementById('expensePieChart'), {
+        type: 'pie',
+        data: {
+            labels: expenseStats.map(e => e._id),
+            datasets: [{
+                data: expenseStats.map(e => e.total),
+                backgroundColor: ['#00d2ff', '#ffcc33', '#ff4b2b', '#ffffff', '#1a2327'],
+                hoverOffset: 15,
+                borderWidth: 1,
+                borderColor: '#1a2327'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'right', labels: { padding: 20, color: '#e0f2f1' } }
+            }
+        }
+    });
+
+    // 4. Dept Doughnut Chart
+    new Chart(document.getElementById('deptDoughnutChart'), {
+        type: 'doughnut',
+        data: {
+            labels: deptStats.map(d => d._id || 'General'),
+            datasets: [{
+                data: deptStats.map(d => d.count),
+                backgroundColor: ['#00d2ff', '#3a7bd5', '#00d2ff', '#e0f2f1', '#1a2327'],
+                borderWidth: 1,
+                borderColor: '#1a2327',
+                cutout: '80%'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 20, color: '#e0f2f1' } }
+            }
+        }
+    });
+
+    // 5. Performance Polar Area Chart
+    new Chart(document.getElementById('performancePolarChart'), {
+        type: 'polarArea',
+        data: {
+            labels: performanceStats.map(p => `LVL ${p._id}`),
+            datasets: [{
+                data: performanceStats.map(p => p.count),
+                backgroundColor: [
+                    'rgba(255, 75, 43, 0.4)',
+                    'rgba(255, 204, 51, 0.4)',
+                    'rgba(0, 210, 255, 0.4)',
+                    'rgba(58, 123, 213, 0.4)',
+                    'rgba(224, 242, 241, 0.4)'
+                ],
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,0.05)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    grid: { color: 'rgba(255,255,255,0.05)' },
+                    angleLines: { color: 'rgba(255,255,255,0.05)' },
+                    ticks: { backdropColor: 'transparent', color: '#94a3b8' }
+                }
+            },
+            plugins: {
+                legend: { position: 'right' }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Document - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verify-header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 4rem 0 3rem;
+        text-align: center;
+    }
+
+    .verify-content {
+        max-width: 800px;
+        margin: -3rem auto 5rem;
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 10;
+    }
+
+    .verify-icon {
+        width: 100px;
+        height: 100px;
+        background: rgba(44, 62, 80, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        font-size: 3rem;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verify-header">
+    <h1 class="fw-bold">Document Verification</h1>
+    <p class="opacity-75">Verify the authenticity of digital signatures and documents issued by HRMS.</p>
+</div>
+
+<div class="verify-content">
+    <div class="verify-icon">
+        <i class="fas fa-certificate"></i>
+    </div>
+    <h3 class="text-center fw-bold mb-4">Validate Your Document</h3>
+    <p class="text-center text-muted mb-5">Enter the document ID or unique certificate code found at the bottom of your
+        document to verify its status.</p>
+
+    <form action="{{ url_for('verify_document') }}" method="POST">
+        <div class="mb-4">
+            <label class="form-label fw-bold small text-muted">DOCUMENT IDENTIFIER / CODE</label>
+            <div class="input-group input-group-lg">
+                <span class="input-group-text bg-light border-0"><i class="fas fa-barcode"></i></span>
+                <input type="text" name="doc_id" class="form-control border-0 bg-light"
+                    placeholder="e.g. CERT-12345-HRMS" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary-custom w-100 py-3 fw-bold shadow-sm">
+            <i class="fas fa-shield-alt me-2"></i> VERIFY ONLINE
+        </button>
+    </form>
+
+    <div class="mt-5 pt-4 border-top">
+        <h5 class="fw-bold"><i class="fas fa-info-circle me-2"></i>Why verify?</h5>
+        <p class="text-muted small">Verification ensures that the document presented to you has not been modified and
+            was indeed issued by our official Human Resource Management System. All documents are digitally signed and
+            cryptographically verified.</p>
+    </div>
+</div>
+{% endblock %}

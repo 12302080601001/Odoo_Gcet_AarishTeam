@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Expense Claims - HRMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 animate-fade-up">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="mb-0"><i class="fas fa-receipt gradient-text"></i> My Expense Claims</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Applied On</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if expenses %}
+                            {% for e in expenses %}
+                            <tr>
+                                <td><span class="badge bg-dark">{{ e.category }}</span></td>
+                                <td><strong style="color: #1e293b; font-weight: 700;">₹{{ "{:,.2f}".format(e.amount)
+                                        }}</strong></td>
+                                <td><small class="text-muted">{{ e.description }}</small></td>
+                                <td>
+                                    <span class="badge-custom badge-{{ e.status.lower() }}">{{ e.status }}</span>
+                                </td>
+                                <td>{{ e.created_at | date_format('%d %b %Y') }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-muted">No expense claims found.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="glass-card p-4">
+            <h4 class="section-title mb-4"><i class="fas fa-file-invoice-dollar gradient-text"></i> New Claim</h4>
+            <form action="{{ url_for('apply_expense') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Amount (₹)</label>
+                    <input type="number" name="amount" class="form-control form-control-custom" placeholder="0.00"
+                        step="0.01" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Category</label>
+                    <select name="category" class="form-control form-control-custom" required>
+                        <option value="Travel">Travel</option>
+                        <option value="Food">Food & Meals</option>
+                        <option value="Internet">Internet/Connectivity</option>
+                        <option value="Office Supplies">Office Supplies</option>
+                        <option value="Medical">Medical</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Description</label>
+                    <textarea name="description" class="form-control form-control-custom" rows="3"
+                        placeholder="Explain the expense..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100">Submit Claim</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Company Policies - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .policy-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+    }
+
+    .policy-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 30px rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .policy-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .policy-icon {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+    }
+
+    .policy-body {
+        padding: 1.5rem;
+        flex-grow: 1;
+    }
+
+    .policy-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+
+    .policy-category {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6366f1;
+        background: rgba(99, 102, 241, 0.1);
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+
+    .policy-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px dashed rgba(99, 102, 241, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .search-container {
+        max-width: 600px;
+        margin: 0 auto 3rem;
+    }
+
+    .search-input {
+        border-radius: 15px !important;
+        padding: 0.75rem 1.5rem !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.05) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-5 fw-bold"
+        style="background: linear-gradient(135deg, #6366f1, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+        Company Policies</h1>
+    <p class="text-muted" style="font-weight: 500;">Everything you need to know about our work environment and
+        guidelines.</p>
+</div>
+
+{% if session.get('role') in ['HR', 'Administrator'] %}
+<div class="d-flex justify-content-end mb-4">
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
+        <i class="fas fa-plus me-2"></i> Add New Policy
+    </button>
+</div>
+{% endif %}
+
+<div class="row g-4">
+    {% if policies %}
+    {% for p in policies %}
+    <div class="col-md-6 col-lg-4 animate-fade-up">
+        <div class="policy-card">
+            <div class="policy-header">
+                <div class="policy-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <span class="policy-category">{{ p.category or 'General' }}</span>
+            </div>
+            <div class="policy-body">
+                <h3 class="policy-title">{{ p.title }}</h3>
+                <p class="text-muted small mb-0">{{ p.content[:150] }}{% if p.content|length > 150 %}...{% endif %}</p>
+            </div>
+            <div class="policy-footer">
+                <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> {{ p.effective_date | date_format
+                    }}</small>
+                <button class="btn btn-link p-0 text-primary text-decoration-none fw-bold" style="font-size: 0.85rem;"
+                    data-bs-toggle="modal" data-bs-target="#policyModal{{ p.id }}">
+                    Read Full Policy <i class="fas fa-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy Detail Modal -->
+    <div class="modal fade" id="policyModal{{ p.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 24px; overflow: hidden;">
+                <div class="modal-header border-0 p-4"
+                    style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white;">
+                    <h5 class="modal-title fw-bold">{{ p.title }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4" style="background: #f8f9ff;">
+                    <div class="mb-4">
+                        <span class="policy-category mb-0">{{ p.category or 'General' }}</span>
+                        <small class="text-muted ms-3"><i class="far fa-calendar-alt me-1"></i> Effective from: {{
+                            p.effective_date | date_format }}</small>
+                    </div>
+                    <div style="line-height: 1.8; color: #475569;">
+                        {{ p.content | safe }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="policy-icon mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+            <i class="fas fa-file-contract"></i>
+        </div>
+        <h3 class="text-muted">No policies published yet</h3>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Policy Modal -->
+<div class="modal fade" id="addPolicyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold">Publish New Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_policy') }}" method="POST">
+                <div class="modal-body p-4 pt-0">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Policy Title</label>
+                        <input type="text" name="title" class="form-control form-control-custom"
+                            placeholder="e.g. Remote Work Policy" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Category</label>
+                        <select name="category" class="form-control form-control-custom" required>
+                            <option value="HR">Human Resources</option>
+                            <option value="IT">Information Technology</option>
+                            <option value="Finance">Finance & Expenses</option>
+                            <option value="General">General Conduct</option>
+                            <option value="Security">Security & Privacy</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Policy Content</label>
+                        <textarea name="content" class="form-control form-control-custom" rows="8"
+                            placeholder="Enter full policy details here..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-primary-custom w-100">Publish Policy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Payslip - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .payslip-container,
+        .payslip-container * {
+            visibility: visible;
+        }
+
+        .payslip-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .btn-print {
+            display: none !important;
+        }
+
+        body {
+            background: white !important;
+        }
+    }
+
+    .payslip-container {
+        background: white;
+        color: #1e293b;
+        border-radius: 0;
+        padding: 40px;
+        box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+        max-width: 900px;
+        margin: 0 auto;
+        border: 1px solid #e2e8f0;
+    }
+
+    .payslip-header {
+        border-bottom: 2px solid #6366f1;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .company-name {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #6366f1;
+        letter-spacing: -1px;
+    }
+
+    .payslip-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+    }
+
+    .detail-label {
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        font-weight: 700;
+    }
+
+    .detail-value {
+        color: #1e293b;
+        font-weight: 600;
+    }
+
+    .salary-table {
+        width: 100%;
+        margin-bottom: 30px;
+    }
+
+    .salary-table th {
+        background: #f8fafc;
+        padding: 12px;
+        text-align: left;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .salary-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .total-row {
+        background: #f1f5f9;
+        font-weight: 700;
+    }
+
+    .net-salary-box {
+        background: #6366f1;
+        color: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        margin: 30px 0;
+    }
+
+    .seal-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 50px;
+        border-top: 1px solid #e2e8f0;
+        padding-top: 30px;
+    }
+
+    .seal-box {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 0.7rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .seal-box::after {
+        content: 'OFFICIAL SEAL';
+        position: absolute;
+    }
+
+    .signature-box {
+        text-align: center;
+    }
+
+    .signature-line {
+        width: 200px;
+        border-top: 1px solid #1e293b;
+        margin-top: 40px;
+        margin-bottom: 5px;
+    }
+
+    .verify-code {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9rem;
+        color: #6366f1;
+        padding: 5px 10px;
+        border: 1px solid #6366f1;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mb-4 text-center">
+    <button class="btn btn-primary-custom btn-print" onclick="window.print()">
+        <i class="fas fa-print"></i> Download & Print Secure Payslip
+    </button>
+</div>
+
+<div class="payslip-container">
+    <div class="payslip-header d-flex justify-content-between align-items-center">
+        <div>
+            <div class="company-name"><i class="fas fa-building"></i> HRMS CORP</div>
+            <div class="text-muted small">Global Headquarters | Payroll Division</div>
+        </div>
+        <div class="text-end">
+            <div class="payslip-title">Salary Certificate</div>
+            <div class="text-muted small">Period: {{ current_month }}</div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <div class="detail-label">Employee Name</div>
+            <div class="detail-value">{{ user.profile.full_name }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Employee ID</div>
+            <div class="detail-value">#{{ user.employee_id }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Designation</div>
+            <div class="detail-value">{{ user.profile.designation or 'Associate' }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Department</div>
+            <div class="detail-value">{{ user.profile.department or 'General' }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Joining Date</div>
+            <div class="detail-value">{{ user.profile.joining_date | date_format('%d %b %Y') }}</div>
+        </div>
+        <div class="col-md-4">
+            <div class="detail-label">Status</div>
+            <div class="detail-value"><span class="text-success"><i class="fas fa-check-circle"></i> Active</span></div>
+        </div>
+    </div>
+
+    <table class="salary-table">
+        <thead>
+            <tr>
+                <th>Earnings (Incomes)</th>
+                <th class="text-end">Amount (INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Basic Salary</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format(user.profile.basic_salary or 0) }}</td>
+            </tr>
+            <tr>
+                <td>House Rent Allowance (HRA)</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format((user.profile.allowances or 0) * 0.4) }}</td>
+            </tr>
+            <tr>
+                <td>Special Allowances</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format((user.profile.allowances or 0) * 0.6) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Gross Earnings</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format((user.profile.basic_salary or 0) + (user.profile.allowances
+                    or 0)) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table class="salary-table">
+        <thead>
+            <tr>
+                <th>Deductions (Liabilities)</th>
+                <th class="text-end">Amount (INR)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Provident Fund (PF)</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format((user.profile.deductions or 0) * 0.5) }}</td>
+            </tr>
+            <tr>
+                <td>Professional Tax/Loss of Pay</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format((user.profile.deductions or 0) * 0.5) }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Total Deductions</td>
+                <td class="text-end">₹ {{ "{:,.2f}".format(user.profile.deductions or 0) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="net-salary-box">
+        <div class="x-small text-uppercase mb-1">Total Net Payable Salary</div>
+        <div class="h2 mb-0 fw-bold">₹ {{ "{:,.2f}".format(user.profile.net_salary or 0) }}</div>
+        <div class="small opacity-75 mt-2">Payable for the month of {{ current_month }}</div>
+    </div>
+
+    <div class="seal-section">
+        <div class="text-start">
+            <div class="detail-label">Verification System</div>
+            <div class="verify-code mb-2 d-inline-block">{{ verify_code }}</div>
+            <div class="small text-muted" style="font-size: 0.7rem;">
+                <i class="fas fa-shield-alt"></i> This document is digitally signed and cryptographically verified.<br>
+                Verify online at <u>hrms.com/verify</u>
+            </div>
+
+            <div class="mt-3">
+                <i class="fas fa-qrcode fa-4x text-muted"></i>
+            </div>
+        </div>
+
+        <div class="d-flex gap-5">
+            <div class="seal-box">
+                <i class="fas fa-certificate fa-3x opacity-25"></i>
+            </div>
+            <div class="signature-box">
+                <div
+                    style="font-family: 'Brush Script MT', cursive; font-size: 1.5rem; color: #1e293b; margin-bottom: 0.5rem;">
+                    M.K. Bharvad</div>
+                <div class="signature-line"></div>
+                <div class="small fw-bold">Payroll Manager</div>
+                <div class="x-small text-muted">HRMS Corporate Services</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center mt-5 p-3 rounded" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+        <p class="x-small text-muted mb-0">Note: This is a computer-generated salary certificate and does not require a
+            physical signature if verified via code. For any discrepancies, please contact the Finance Department.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Login - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+
+    .login-card {
+        max-width: 480px;
+        width: 100%;
+        background: white;
+        border: 1px solid #dee2e6;
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        animation: slideUp 0.6s ease;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .login-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 8px 20px rgba(44, 62, 80, 0.2);
+    }
+
+    .login-title {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .input-group-custom {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+        font-size: 1.1rem;
+    }
+
+    .form-control-icon {
+        padding-left: 3.25rem;
+        border: 1px solid #dee2e6;
+        border-radius: 10px;
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-icon:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.1);
+    }
+
+    .forgot-password {
+        color: #2c3e50;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .forgot-password:hover {
+        color: #34495e;
+        text-decoration: underline;
+    }
+
+    .form-check-input:checked {
+        background-color: #2c3e50;
+        border-color: #2c3e50;
+    }
+
+    .form-check-label {
+        color: #6c757d !important;
+        font-weight: 500;
+    }
+
+    .btn-login {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        border: none;
+        color: white;
+        padding: 0.875rem 2rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
+    }
+
+    .btn-login:hover {
+        background: linear-gradient(135deg, #34495e, #2c3e50);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(44, 62, 80, 0.3);
+        color: white;
+    }
+
+    .divider {
+        text-align: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        width: 100%;
+        height: 1px;
+        background: #dee2e6;
+    }
+
+    .divider span {
+        background: white;
+        padding: 0 1rem;
+        position: relative;
+        color: #6c757d;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .signup-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .signup-link a {
+        color: #2c3e50;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .signup-link a:hover {
+        color: #34495e;
+        text-decoration: underline;
+    }
+
+    .demo-credentials {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        border-left: 4px solid #2c3e50;
+        padding: 1.25rem;
+        margin-top: 1.5rem;
+    }
+
+    .demo-credentials p {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+
+    .demo-credentials strong {
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <a href="{{ url_for('index') }}" class="btn btn-link text-muted p-0 mb-3 d-inline-flex align-items-center"
+            style="text-decoration: none;">
+            <i class="fas fa-arrow-left me-2"></i> Back to Home
+        </a>
+        <div class="login-header">
+            <div class="login-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to access your HRMS account</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="input-group-custom">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" name="email" class="form-control form-control-icon" placeholder="Email Address"
+                    required>
+            </div>
+
+            <div class="input-group-custom">
+                <i class="fas fa-lock input-icon"></i>
+                <input type="password" name="password" class="form-control form-control-icon" placeholder="Password"
+                    required>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe" style="color: #6c757d;">
+                        Remember me
+                    </label>
+                </div>
+                <a href="{{ url_for('forgot_password') }}" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-login w-100 mb-3">
+                <i class="fas fa-sign-in-alt me-2"></i> Sign In
+            </button>
+        </form>
+
+        <div class="divider">
+            <span>OR</span>
+        </div>
+
+        <div class="signup-link">
+            Don't have an account? <a href="{{ url_for('signup') }}">Sign Up</a>
+        </div>
+
+        <div class="demo-credentials">
+            <p class="mb-1">
+                <i class="fas fa-info-circle me-2"></i> <strong>Demo Credentials:</strong>
+            </p>
+            <p class="mb-0" style="color: #2c3e50; font-weight: 600;">
+                Admin: admin@hrms.com / admin123
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

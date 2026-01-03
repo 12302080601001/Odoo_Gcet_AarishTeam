@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Client Management - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .client-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+    }
+
+    .client-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .client-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+    }
+
+    .client-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.25rem;
+    }
+
+    .client-company {
+        color: #6366f1;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .info-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 0.85rem;
+        color: #64748b;
+    }
+
+    .info-list li {
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .status-badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="display-6 fw-bold text-dark">Client Management</h1>
+        <p class="text-muted">Manage your business partners and collaborative entities.</p>
+    </div>
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addClientModal">
+        <i class="fas fa-plus me-2"></i> Onboard New Client
+    </button>
+</div>
+
+<div class="row g-4">
+    {% if clients %}
+    {% for c in clients %}
+    <div class="col-md-6 col-lg-4 animate-fade-up">
+        <div class="client-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div class="client-avatar">
+                    {{ c.name[0].upper() }}
+                </div>
+                <span
+                    class="badge {% if c.status == 'Active' %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %} status-badge">
+                    {{ c.status }}
+                </span>
+            </div>
+            <h3 class="client-name">{{ c.name }}</h3>
+            <p class="client-company"><i class="fas fa-building me-1"></i> {{ c.company }}</p>
+
+            <ul class="info-list mb-4">
+                <li><i class="fas fa-envelope fa-fw"></i> {{ c.email }}</li>
+                <li><i class="fas fa-phone fa-fw"></i> {{ c.phone }}</li>
+                <li><i class="fas fa-map-marker-alt fa-fw"></i> {{ c.address }}</li>
+            </ul>
+
+            <div class="mt-auto pt-3 border-top d-flex gap-2">
+                <button class="btn btn-outline-primary btn-sm flex-fill" style="border-radius: 8px;"
+                    data-bs-toggle="modal" data-bs-target="#editClientModal{{ c.id }}">
+                    <i class="fas fa-edit me-1"></i> Edit
+                </button>
+                <form action="{{ url_for('delete_client', client_id=c.id) }}" method="POST" class="flex-fill">
+                    <button type="submit" class="btn btn-outline-danger btn-sm w-100" style="border-radius: 8px;"
+                        onclick="return confirm('Are you sure you want to delete this client?')">
+                        <i class="fas fa-trash-alt me-1"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Client Modal -->
+    <div class="modal fade" id="editClientModal{{ c.id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 20px;">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Edit Client: {{ c.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('update_client', client_id=c.id) }}" method="POST">
+                    <div class="modal-body p-4 pt-0">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Full Name</label>
+                                <input type="text" name="name" class="form-control form-control-custom"
+                                    value="{{ c.name }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Email Address</label>
+                                <input type="email" name="email" class="form-control form-control-custom"
+                                    value="{{ c.email }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold text-muted">Phone Number</label>
+                                <input type="text" name="phone" class="form-control form-control-custom"
+                                    value="{{ c.phone }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Company Name</label>
+                                <input type="text" name="company" class="form-control form-control-custom"
+                                    value="{{ c.company }}" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted">Business Address</label>
+                                <textarea name="address" class="form-control form-control-custom" rows="2"
+                                    required>{{ c.address }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary-custom w-100">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="client-avatar mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+            <i class="fas fa-users"></i>
+        </div>
+        <h3 class="text-muted">No clients found</h3>
+        <p class="text-muted small">Start by adding your first client to the system.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Client Modal -->
+<div class="modal fade" id="addClientModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold">Add New Client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_client') }}" method="POST">
+                <div class="modal-body p-4 pt-0">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Full Name</label>
+                            <input type="text" name="name" class="form-control form-control-custom"
+                                placeholder="John Doe" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Email Address</label>
+                            <input type="email" name="email" class="form-control form-control-custom"
+                                placeholder="john@example.com" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Phone Number</label>
+                            <input type="text" name="phone" class="form-control form-control-custom" placeholder="+1..."
+                                required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Company Name</label>
+                            <input type="text" name="company" class="form-control form-control-custom"
+                                placeholder="Acme Corp" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Business Address</label>
+                            <textarea name="address" class="form-control form-control-custom" rows="2"
+                                placeholder="Street, City, Country" required></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-primary-custom w-100">Add Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

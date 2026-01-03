@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - HRMS{% endblock %}
+
+{% block content %}
+<div class="card-custom" style="max-width: 800px; margin: 0 auto;">
+    <div class="card-header-custom">
+        <h3 class="mb-0">
+            <i class="fas fa-user-edit"></i> Edit Profile
+        </h3>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <form method="POST" action="{{ url_for('edit_profile') }}">
+            {% if user.role == 'HR' %}
+            <div class="mb-3">
+                <label class="form-label-custom">Full Name</label>
+                <input type="text" name="full_name" class="form-control form-control-custom"
+                    value="{{ user.profile.full_name }}" required>
+            </div>
+            {% endif %}
+
+            <div class="mb-3">
+                <label class="form-label-custom">Phone Number</label>
+                <input type="tel" name="phone" class="form-control form-control-custom"
+                    value="{{ user.profile.phone or '' }}" placeholder="+91 1234567890">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom">Address</label>
+                <textarea name="address" class="form-control form-control-custom" rows="3"
+                    placeholder="Enter your full address">{{ user.profile.address or '' }}</textarea>
+            </div>
+
+            {% if user.role == 'HR' %}
+            <div class="mb-3">
+                <label class="form-label-custom">Designation</label>
+                <input type="text" name="designation" class="form-control form-control-custom"
+                    value="{{ user.profile.designation or '' }}" placeholder="e.g., Senior Developer">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label-custom">Department</label>
+                <input type="text" name="department" class="form-control form-control-custom"
+                    value="{{ user.profile.department or '' }}" placeholder="e.g., IT Department">
+            </div>
+            {% endif %}
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary-custom">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <a href="{{ url_for('profile') }}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

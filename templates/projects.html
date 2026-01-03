@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Projects Management - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .project-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+    }
+
+    .project-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+    }
+
+    .project-status {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-in-progress {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+    }
+
+    .status-completed {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-on-hold {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        border-radius: 4px;
+    }
+
+    .team-avatars {
+        display: flex;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+
+    .avatar-stack {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        border: 2px solid white;
+        margin-left: -10px;
+        background: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #475569;
+        overflow: hidden;
+    }
+
+    .avatar-stack:first-child {
+        margin-left: 0;
+    }
+
+    .project-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="display-6 fw-bold text-dark">Projects Management</h1>
+        <p class="text-muted">Track development progress and resource allocation.</p>
+    </div>
+    <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#addProjectModal">
+        <i class="fas fa-plus me-2"></i> Launch New Project
+    </button>
+</div>
+
+<div class="row g-4">
+    {% if projects %}
+    {% for p in projects %}
+    <div class="col-md-6 col-lg-4 animate-fade-up">
+        <div class="project-card">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <span class="project-status status-{{ p.status.lower().replace(' ', '-') }}">
+                    {{ p.status }}
+                </span>
+                <div class="dropdown">
+                    <button class="btn btn-link p-0 text-muted" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-sm" style="border-radius: 12px;">
+                        <li><a class="dropdown-item py-2" href="#" data-bs-toggle="modal"
+                                data-bs-target="#updateProjectModal{{ p.id }}"><i
+                                    class="fas fa-edit me-2 text-primary"></i> Update Status</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item py-2 text-danger" href="#"><i class="fas fa-trash-alt me-2"></i>
+                                Delete Project</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3 class="h5 fw-bold text-dark mb-1">{{ p.name }}</h3>
+            <p class="text-primary small fw-bold mb-3"><i class="fas fa-user-tie me-1"></i> {{ p.client.company if
+                p.client else 'No Client' }}</p>
+
+            <p class="text-muted small mb-4">{{ p.description[:100] }}{% if p.description|length > 100 %}...{% endif %}
+            </p>
+
+            <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-muted">Progress</span>
+                    <span class="small fw-bold text-dark">{{ p.progress }}%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ p.progress }}%"></div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-end">
+                    <div class="team-avatars">
+                        {% if p.team %}
+                        {% for m in p.team[:4] %}
+                        <div class="avatar-stack" title="{{ m.profile.full_name }}">
+                            {{ m.profile.full_name[0] }}
+                        </div>
+                        {% endfor %}
+                        {% if p.team|length > 4 %}
+                        <div class="avatar-stack">+{{ p.team|length - 4 }}</div>
+                        {% endif %}
+                        {% else %}
+                        <small class="text-muted font-italic">No team assigned</small>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted d-block" style="font-size: 0.7rem;">BUDGET</small>
+                        <span class="fw-bold text-dark">₹{{ "{:,.0f}".format(p.budget) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal fade" id="updateProjectModal{{ p.id }}" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0" style="border-radius: 20px;">
+                <div class="modal-header border-0 p-4">
+                    <h5 class="modal-title fw-bold">Update Details: {{ p.name }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('update_project_status', project_id=p.id) }}" method="POST">
+                    <div class="modal-body p-4 pt-0">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Project Status</label>
+                            <select name="status" class="form-control form-control-custom">
+                                <option value="In Progress" {% if p.status=='In Progress' %}selected{% endif %}>In
+                                    Progress</option>
+                                <option value="Completed" {% if p.status=='Completed' %}selected{% endif %}>Completed
+                                </option>
+                                <option value="On Hold" {% if p.status=='On Hold' %}selected{% endif %}>On Hold</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Progress Percentage ({{ p.progress
+                                }}%)</label>
+                            <input type="range" name="progress" class="form-range" min="0" max="100"
+                                value="{{ p.progress }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 p-4 pt-0">
+                        <button type="submit" class="btn btn-primary-custom w-100">Update Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <div class="avatar-stack mx-auto mb-3" style="width: 80px; height: 80px; font-size: 2rem; margin-left: 0;">
+            <i class="fas fa-tasks"></i>
+        </div>
+        <h3 class="text-muted">No projects found</h3>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Add Project Modal -->
+<div class="modal fade" id="addProjectModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 20px;">
+            <div class="modal-header border-0 p-4">
+                <h5 class="modal-title fw-bold">Create New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_project') }}" method="POST">
+                <div class="modal-body p-4 pt-0">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Project Name</label>
+                            <input type="text" name="name" class="form-control form-control-custom"
+                                placeholder="e.g. Website Redesign" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Client</label>
+                            <select name="client_id" class="form-control form-control-custom" required>
+                                {% for c in clients %}
+                                <option value="{{ c.id }}">{{ c.company }} ({{ c.name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Budget (₹)</label>
+                            <input type="number" name="budget" class="form-control form-control-custom"
+                                placeholder="50000" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Start Date</label>
+                            <input type="date" name="start_date" class="form-control form-control-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Estimated End Date</label>
+                            <input type="date" name="end_date" class="form-control form-control-custom" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Description</label>
+                            <textarea name="description" class="form-control form-control-custom" rows="3"
+                                required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Assign Team Members</label>
+                            <div class="card p-3 border-0 bg-light-purple"
+                                style="border-radius: 12px; max-height: 200px; overflow-y: auto;">
+                                {% for e in employees %}
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" name="team_members[]"
+                                        value="{{ e.id }}" id="emp{{ e.id }}">
+                                    <label class="form-check-label small" for="emp{{ e.id }}">
+                                        {{ e.profile.full_name }} ({{ e.profile.designation }})
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="submit" class="btn btn-primary-custom w-100">Launch Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Management - HRMS{% endblock %}
+
+{% block content %}
+<div class="card-custom">
+    <div class="card-header-custom">
+        <h3 class="mb-0">
+            <i class="fas fa-calendar-check"></i> Attendance Management
+        </h3>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <div class="mb-4">
+            <label class="form-label-custom">Select Employee</label>
+            <select id="employeeSelect" class="form-control form-control-custom">
+                <option value="">-- Select an employee --</option>
+                {% for emp in employees %}
+                <option value="{{ emp.id }}">{{ emp.profile.full_name }} ({{ emp.employee_id }})</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div id="attendanceData" style="display: none;">
+            <div class="alert"
+                style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary-color); border-radius: 10px; padding: 1rem;">
+                <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                <small style="color: var(--text-light);">
+                    Viewing attendance records for the current month. Use the employee selector above to switch between
+                    employees.
+                </small>
+            </div>
+
+            <div class="table-responsive mt-4">
+                <table class="table table-custom">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Check In</th>
+                            <th>Check Out</th>
+                            <th>Hours</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="noSelection" class="text-center py-5">
+            <i class="fas fa-user-clock" style="font-size: 4rem; color: var(--text-muted); opacity: 0.3;"></i>
+            <p class="mt-3" style="color: var(--text-muted);">Please select an employee to view attendance records</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const employeeSelect = document.getElementById('employeeSelect');
+    const attendanceData = document.getElementById('attendanceData');
+    const noSelection = document.getElementById('noSelection');
+    const tableBody = document.getElementById('attendanceTableBody');
+
+    employeeSelect.addEventListener('change', function () {
+        if (this.value) {
+            noSelection.style.display = 'none';
+            attendanceData.style.display = 'block';
+
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center" style="padding: 2rem;">
+                        <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--primary-color);"></i>
+                        <p style="margin-top: 1rem; color: var(--text-muted);">Loading attendance records...</p>
+                    </td>
+                </tr>
+            `;
+
+            fetch(`/api/attendance/${this.value}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        tableBody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center" style="padding: 2rem;">
+                                    <i class="fas fa-calendar-times" style="font-size: 2rem; color: var(--text-muted); opacity: 0.3;"></i>
+                                    <p style="margin-top: 1rem; color: var(--text-muted);">No attendance records found for this month</p>
+                                </td>
+                            </tr>
+                        `;
+                    } else {
+                        tableBody.innerHTML = '';
+                        data.forEach(record => {
+                            tableBody.innerHTML += `
+                                <tr>
+                                    <td>${record.date}</td>
+                                    <td>${record.check_in}</td>
+                                    <td>${record.check_out}</td>
+                                    <td>-</td>
+                                    <td><span class="badge ${record.status === 'Present' ? 'bg-success' : 'bg-warning'}">${record.status}</span></td>
+                                    <td>${record.remarks}</td>
+                                </tr>
+                            `;
+                        });
+                    }
+                })
+                .catch(error => {
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading data</td></tr>`;
+                });
+        } else {
+            noSelection.style.display = 'block';
+            attendanceData.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

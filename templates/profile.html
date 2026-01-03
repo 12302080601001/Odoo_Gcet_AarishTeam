@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-hero {
+        position: relative;
+        padding: 4rem 2rem;
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .profile-hero::before {
+        content: '';
+        position: absolute;
+        top: -20%;
+        right: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, transparent 70%);
+        z-index: 0;
+    }
+
+    .avatar-wrapper {
+        position: relative;
+        width: 150px;
+        height: 150px;
+        margin: 0 auto 1.5rem;
+    }
+
+    .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid rgba(99, 102, 241, 0.3);
+        background: #1e293b;
+    }
+
+    .upload-overlay {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        background: var(--primary-color);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        cursor: pointer;
+        transition: 0.3s;
+        border: 3px solid #0f172a;
+    }
+
+    .upload-overlay:hover {
+        transform: scale(1.1);
+        background: var(--secondary-color);
+    }
+
+    .info-card {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(10px);
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        height: 100%;
+    }
+
+    .data-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .data-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .data-value {
+        color: var(--text-light);
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-hero animate-fade-up text-center">
+    <div class="avatar-wrapper">
+        {% if user.profile.profile_picture %}
+        <img src="{{ url_for('static', filename='uploads/profile_pics/' + user.profile.profile_picture) }}"
+            class="profile-avatar" alt="Profile">
+        {% else %}
+        <div class="profile-avatar d-flex align-items-center justify-content-center text-primary"
+            style="font-size: 4rem; font-weight: 800;">
+            {{ user.profile.full_name[0].upper() }}
+        </div>
+        {% endif %}
+
+        <label for="pic-upload" class="upload-overlay">
+            <i class="fas fa-camera"></i>
+        </label>
+        <form id="pic-form" action="{{ url_for('upload_profile_pic') }}" method="POST" enctype="multipart/form-data"
+            class="d-none">
+            <input type="file" name="profile_pic" id="pic-upload" accept="image/*"
+                onchange="document.getElementById('pic-form').submit()">
+        </form>
+    </div>
+
+    <h1 class="gradient-text mb-1">{{ user.profile.full_name }}</h1>
+    <p class="text-muted mb-4">{{ user.profile.designation or 'Team Member' }} | {{ user.employee_id }}</p>
+
+    <div class="d-flex justify-content-center gap-3">
+        <a href="{{ url_for('edit_profile') }}" class="btn btn-primary-custom px-4">Edit Profile</a>
+        <a href="{{ url_for('payroll') }}" class="btn glass-card text-white px-4">Payroll View</a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="info-card">
+            <h5 class="section-title mb-4"><i class="fas fa-id-card-alt gradient-text"></i> Contact Details</h5>
+            <div class="data-row">
+                <span class="data-label">Email Address</span>
+                <span class="data-value">{{ user.email }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Phone Number</span>
+                <span class="data-value">{{ user.profile.phone or 'Not set' }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Home Address</span>
+                <span class="data-value">{{ user.profile.address or 'Not set' }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 animate-fade-up" style="animation-delay: 0.2s;">
+        <div class="info-card">
+            <h5 class="section-title mb-4"><i class="fas fa-briefcase gradient-text"></i> Employment Info</h5>
+            <div class="data-row">
+                <span class="data-label">Department</span>
+                <span class="data-value">{{ user.profile.department or 'N/A' }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">Joining Date</span>
+                <span class="data-value">{{ user.profile.joining_date | date_format('%d %b %Y') }}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-label">System Role</span>
+                <span class="data-value text-primary font-weight-bold">{{ user.role }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 animate-fade-up" style="animation-delay: 0.3s;">
+        <div class="info-card">
+            <h5 class="section-title mb-4"><i class="fas fa-coins gradient-text"></i> Current Salary Structure</h5>
+            <div class="row text-center">
+                <div class="col-4">
+                    <small class="text-muted d-block">Basic</small>
+                    <span class="h5 text-white">₹{{ "{:,.0f}".format(user.profile.basic_salary) }}</span>
+                </div>
+                <div class="col-4">
+                    <small class="text-muted d-block">Allowances</small>
+                    <span class="h5 text-success">+₹{{ "{:,.0f}".format(user.profile.allowances) }}</span>
+                </div>
+                <div class="col-4 border-start border-secondary">
+                    <small class="text-primary d-block">Monthly Net</small>
+                    <span class="h4 gradient-text">₹{{ "{:,.0f}".format(user.profile.net_salary) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

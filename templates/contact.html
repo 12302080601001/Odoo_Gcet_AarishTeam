@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .contact-header {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 4rem 0 3rem;
+        text-align: center;
+    }
+
+    .contact-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+    }
+
+    .contact-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .contact-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        margin-top: -3rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .contact-info-card {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        height: 100%;
+    }
+
+    .contact-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    .contact-info-title {
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-info-text {
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-3">
+    <a href="javascript:history.back()" class="btn btn-link text-white p-0 mb-3 d-inline-flex align-items-center"
+        style="text-decoration: none;">
+        <i class="fas fa-arrow-left me-2"></i> Back
+    </a>
+</div>
+<div class="contact-header">
+    <div class="container">
+        <h1 class="contact-title">Get In Touch</h1>
+        <p class="contact-subtitle">We'd love to hear from you. Send us a message!</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="contact-card">
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h5 class="contact-info-title">Address</h5>
+                    <p class="contact-info-text">123 Business Street<br>City, State 12345</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <h5 class="contact-info-title">Phone</h5>
+                    <p class="contact-info-text">+1 (555) 123-4567<br>Mon-Fri 9AM-6PM</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="contact-info-card">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <h5 class="contact-info-title">Email</h5>
+                    <p class="contact-info-text">support@hrms.com<br>info@hrms.com</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <h3 class="text-center mb-4" style="color: #2c3e50; font-weight: 800;">Send Us a Message</h3>
+                <form method="POST" action="{{ url_for('contact_us') }}">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Full Name</label>
+                            <input type="text" name="name" class="form-control form-control-custom" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-muted small">Email Address</label>
+                            <input type="email" name="email" class="form-control form-control-custom" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted small">Subject</label>
+                            <input type="text" name="subject" class="form-control form-control-custom" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-muted small">Message</label>
+                            <textarea name="message" class="form-control form-control-custom" rows="5"
+                                required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary-custom w-100">
+                                <i class="fas fa-paper-plane me-2"></i> Send Message
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

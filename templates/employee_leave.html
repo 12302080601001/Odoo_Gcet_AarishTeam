@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}My Leave Requests - HRMS{% endblock %}
+
+{% block content %}
+<div class="card-custom">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">
+            <i class="fas fa-umbrella-beach"></i> My Leave Requests
+        </h3>
+        <a href="{{ url_for('apply_leave') }}" class="btn"
+            style="background: white; color: var(--primary-color); font-weight: 600;">
+            <i class="fas fa-plus-circle"></i> Apply Leave
+        </a>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        {% if leave_requests %}
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Leave Type</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Days</th>
+                        <th>Status</th>
+                        <th>Applied On</th>
+                        <th>Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in leave_requests %}
+                    <tr>
+                        <td>
+                            <span class="badge-custom"
+                                style="background: rgba(99, 102, 241, 0.2); color: var(--primary-color);">
+                                {{ leave.leave_type }}
+                            </span>
+                        </td>
+                        <td>{{ leave.start_date | date_format('%d %b %Y') }}</td>
+                        <td>{{ leave.end_date | date_format('%d %b %Y') }}</td>
+                        <td>{{ (leave.end_date - leave.start_date).days + 1 }} days</td>
+                        <td>
+                            <span class="badge-custom badge-{{ leave.status.lower() }}">
+                                {{ leave.status }}
+                            </span>
+                        </td>
+                        <td>{{ leave.created_at | date_format('%d %b %Y') }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary-custom" data-bs-toggle="modal"
+                                data-bs-target="#leaveModal{{ leave.id }}">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                        </td>
+                    </tr>
+
+                    <!-- Leave Details Modal -->
+                    <div class="modal fade" id="leaveModal{{ leave.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content"
+                                style="background: var(--card-bg); border: 1px solid var(--border-color);">
+                                <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                                    <h5 class="modal-title" style="color: var(--text-light);">Leave Request Details</h5>
+                                    <button type="button" class="btn-close btn-close-white"
+                                        data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <strong style="color: var(--text-muted);">Reason:</strong>
+                                        <p style="color: var(--text-light); margin-top: 0.5rem;">{{ leave.reason }}</p>
+                                    </div>
+                                    {% if leave.admin_comment %}
+                                    <div class="mb-3">
+                                        <strong style="color: var(--text-muted);">Admin Comment:</strong>
+                                        <p style="color: var(--text-light); margin-top: 0.5rem;">{{ leave.admin_comment
+                                            }}</p>
+                                    </div>
+                                    {% endif %}
+                                    <div class="mb-3">
+                                        <strong style="color: var(--text-muted);">Status:</strong>
+                                        <span class="badge-custom badge-{{ leave.status.lower() }} ms-2">{{ leave.status
+                                            }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox" style="font-size: 4rem; color: var(--text-muted); opacity: 0.3;"></i>
+            <p class="mt-3" style="color: var(--text-muted);">No leave requests found</p>
+            <a href="{{ url_for('apply_leave') }}" class="btn btn-primary-custom mt-3">
+                <i class="fas fa-plus-circle"></i> Apply for Leave
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

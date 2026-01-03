@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Expenses - HRMS{% endblock %}
+
+{% block content %}
+<div class="card-custom animate-fade-up">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h3 class="mb-0"><i class="fas fa-hand-holding-usd gradient-text"></i> Expense Reimbursement Requests</h3>
+        <span class="badge bg-primary">{{ expenses|length }} Requests</span>
+    </div>
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Employee</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if expenses %}
+                    {% for e in expenses %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar-sm me-2">{{ e.user.profile.full_name[0] }}</div>
+                                <div>
+                                    <div class="text-white small">{{ e.user.profile.full_name }}</div>
+                                    <small class="text-muted" style="font-size: 0.7rem;">{{ e.user.employee_id
+                                        }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-dark">{{ e.category }}</span></td>
+                        <td><strong class="text-success">₹{{ "{:,.2f}".format(e.amount) }}</strong></td>
+                        <td><small class="text-muted">{{ e.description[:50] }}...</small></td>
+                        <td>{{ e.created_at | date_format('%d %b') }}</td>
+                        <td>
+                            <span class="badge-custom badge-{{ e.status.lower() }}">{{ e.status }}</span>
+                        </td>
+                        <td>
+                            {% if e.status == 'Pending' %}
+                            <div class="d-flex gap-2">
+                                <form action="{{ url_for('expense_action', expense_id=e.id, action='approve') }}"
+                                    method="POST">
+                                    <button type="submit" class="btn btn-sm btn-success-custom"><i
+                                            class="fas fa-check"></i></button>
+                                </form>
+                                <form action="{{ url_for('expense_action', expense_id=e.id, action='reject') }}"
+                                    method="POST">
+                                    <button type="submit" class="btn btn-sm btn-danger-custom"><i
+                                            class="fas fa-times"></i></button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <i class="fas fa-lock text-muted"></i>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-muted">No expense claims to manage.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

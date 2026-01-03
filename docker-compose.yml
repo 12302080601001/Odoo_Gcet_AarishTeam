@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  hrms-app:
+    build: .
+    container_name: hrms-application
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_ENV=production
+      - SECRET_KEY=your-secret-key-change-this-in-production
+    volumes:
+      - ./static/uploads:/app/static/uploads
+    restart: unless-stopped
+    networks:
+      - hrms-network
+
+networks:
+  hrms-network:
+    driver: bridge

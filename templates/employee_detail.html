@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}{{ employee.profile.full_name }} - Employee Details{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{{ url_for('employees') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Employees
+    </a>
+</div>
+
+<div class="card-custom">
+    <div class="card-header-custom">
+        <div class="d-flex align-items-center">
+            <div
+                style="width: 60px; height: 60px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; color: var(--primary-color); font-size: 1.5rem; font-weight: 700; margin-right: 1rem;">
+                {{ employee.profile.full_name[0].upper() }}
+            </div>
+            <div>
+                <h3 class="mb-0">{{ employee.profile.full_name }}</h3>
+                <small style="opacity: 0.9;">{{ employee.employee_id }} | {{ employee.profile.designation or 'Employee'
+                    }}</small>
+            </div>
+        </div>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <h5 style="color: var(--text-light); margin-bottom: 1rem;">
+                    <i class="fas fa-user"></i> Personal Information
+                </h5>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Email:</strong> {{ employee.email }}
+                </p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Phone:</strong> {{ employee.profile.phone or 'Not provided' }}
+                </p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Address:</strong> {{ employee.profile.address or 'Not provided' }}
+                </p>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <h5 style="color: var(--text-light); margin-bottom: 1rem;">
+                    <i class="fas fa-briefcase"></i> Job Information
+                </h5>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Department:</strong> {{ employee.profile.department or 'Not assigned' }}
+                </p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Designation:</strong> {{ employee.profile.designation or 'Not assigned' }}
+                </p>
+                <p style="color: var(--text-muted); margin-bottom: 0.5rem;">
+                    <strong>Employment Type:</strong> {{ employee.profile.employment_type or 'Not specified' }}
+                </p>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+        <div class="row">
+            <div class="col-md-4 text-center mb-3">
+                <div style="background: rgba(99, 102, 241, 0.1); padding: 1.5rem; border-radius: 12px;">
+                    <i class="fas fa-calendar-check" style="font-size: 2rem; color: var(--primary-color);"></i>
+                    <h4 style="color: var(--text-light); margin: 1rem 0 0.5rem 0;">{{ attendance_count }}</h4>
+                    <p style="color: var(--text-muted); margin: 0;">Days Present (This Month)</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center mb-3">
+                <div style="background: rgba(139, 92, 246, 0.1); padding: 1.5rem; border-radius: 12px;">
+                    <i class="fas fa-umbrella-beach" style="font-size: 2rem; color: var(--secondary-color);"></i>
+                    <h4 style="color: var(--text-light); margin: 1rem 0 0.5rem 0;">{{ leave_count }}</h4>
+                    <p style="color: var(--text-muted); margin: 0;">Total Leaves Approved</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 text-center mb-3">
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 12px;">
+                    <i class="fas fa-money-bill-wave" style="font-size: 2rem; color: var(--success-color);"></i>
+                    <h4 style="color: var(--text-light); margin: 1rem 0 0.5rem 0;">
+                        ₹{{ "{:,.0f}".format(employee.profile.net_salary) if employee.profile.net_salary else '0' }}
+                    </h4>
+                    <p style="color: var(--text-muted); margin: 0;">Net Salary</p>
+                </div>
+            </div>
+        </div>
+
+        <hr style="border-color: var(--border-color); margin: 2rem 0;">
+
+        <h5 style="color: var(--text-light); margin-bottom: 1rem;">
+            <i class="fas fa-money-bill-wave"></i> Update Payroll
+        </h5>
+
+        <form method="POST" action="{{ url_for('update_payroll', employee_id=employee.id) }}">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label-custom">Basic Salary</label>
+                    <input type="number" name="basic_salary" class="form-control form-control-custom"
+                        value="{{ employee.profile.basic_salary or 0 }}" step="0.01" min="0">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label-custom">Allowances</label>
+                    <input type="number" name="allowances" class="form-control form-control-custom"
+                        value="{{ employee.profile.allowances or 0 }}" step="0.01" min="0">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label-custom">Deductions</label>
+                    <input type="number" name="deductions" class="form-control form-control-custom"
+                        value="{{ employee.profile.deductions or 0 }}" step="0.01" min="0">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label-custom">Net Salary</label>
+                    <input type="text" class="form-control form-control-custom"
+                        value="₹{{ '{:,.2f}'.format(employee.profile.net_salary) if employee.profile.net_salary else '0.00' }}"
+                        readonly style="background: rgba(99, 102, 241, 0.1); border-color: var(--primary-color);">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary-custom">
+                <i class="fas fa-save"></i> Update Payroll
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

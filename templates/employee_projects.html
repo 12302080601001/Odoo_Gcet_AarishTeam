@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}My Projects - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .project-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+    }
+
+    .project-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(99, 102, 241, 0.12);
+    }
+
+    .project-status {
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-in-progress {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+    }
+
+    .status-completed {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+    }
+
+    .status-on-hold {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+    }
+
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+        background-color: #f1f5f9;
+    }
+
+    .progress-bar {
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        border-radius: 4px;
+    }
+
+    .update-item {
+        background: #f8f9ff;
+        border-left: 3px solid #6366f1;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .update-time {
+        font-size: 0.75rem;
+        color: #94a3b8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="display-6 fw-bold text-dark">My Projects</h1>
+        <p class="text-muted">Track your assigned projects and update your work progress.</p>
+    </div>
+</div>
+
+{% if projects %}
+{% for p in projects %}
+<div class="project-card">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h3 class="h4 fw-bold text-dark mb-1">{{ p.name }}</h3>
+                    <p class="text-primary small fw-bold mb-2">
+                        <i class="fas fa-user-tie me-1"></i> {{ p.client.company if p.client else 'No Client' }}
+                    </p>
+                </div>
+                <span class="project-status status-{{ p.status.lower().replace(' ', '-') }}">
+                    {{ p.status }}
+                </span>
+            </div>
+
+            <p class="text-muted small mb-3">{{ p.description }}</p>
+
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="small fw-bold text-muted">Overall Progress</span>
+                    <span class="small fw-bold text-dark">{{ p.progress }}%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" role="progressbar" style="width: {{ p.progress }}%"></div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 text-muted small">
+                <div><i class="fas fa-calendar me-1"></i> Start: {{ p.start_date.strftime('%d %b %Y') }}</div>
+                <div><i class="fas fa-flag-checkered me-1"></i> End: {{ p.end_date.strftime('%d %b %Y') }}</div>
+                <div><i class="fas fa-users me-1"></i> Team: {{ p.team|length if p.team else 0 }} members</div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 bg-light" style="border-radius: 12px;">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-plus-circle me-2 text-primary"></i>Add Work Update</h6>
+                    <form action="{{ url_for('add_project_update', project_id=p.id) }}" method="POST">
+                        <div class="mb-2">
+                            <label class="form-label small fw-bold text-muted">What did you work on?</label>
+                            <textarea name="update_text" class="form-control form-control-custom" rows="3"
+                                placeholder="Describe your work..." required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Hours Worked</label>
+                            <input type="number" name="hours_worked" class="form-control form-control-custom" step="0.5"
+                                min="0" placeholder="0.0" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary-custom w-100 btn-sm">
+                            <i class="fas fa-check me-1"></i> Submit Update
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if p.my_updates %}
+    <div class="mt-4 pt-3 border-top">
+        <h6 class="fw-bold mb-3"><i class="fas fa-history me-2"></i>My Recent Updates</h6>
+        {% for update in p.my_updates %}
+        <div class="update-item">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+                <p class="mb-0 small">{{ update.update_text }}</p>
+                <span class="badge bg-primary-subtle text-primary">{{ update.hours_worked }}h</span>
+            </div>
+            <div class="update-time">
+                <i class="fas fa-clock me-1"></i> {{ update.created_at.strftime('%d %b %Y, %I:%M %p') }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endfor %}
+{% else %}
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fas fa-project-diagram" style="font-size: 4rem; color: #cbd5e1;"></i>
+    </div>
+    <h3 class="text-muted">No Projects Assigned</h3>
+    <p class="text-muted">You don't have any projects assigned to you yet.</p>
+</div>
+{% endif %}
+{% endblock %}

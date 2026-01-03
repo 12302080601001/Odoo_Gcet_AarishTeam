@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}HRMS Reports - Analytics Center{% endblock %}
+
+{% block extra_css %}
+<style>
+    .report-stat-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .report-stat-card:hover {
+        transform: translateY(-5px);
+        border-color: #6366f1;
+    }
+
+    .report-stat-icon {
+        width: 50px;
+        height: 50px;
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin: 0 auto 1rem;
+    }
+
+    .report-table-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+        margin-top: 2rem;
+    }
+
+    .chart-container {
+        height: 300px;
+        position: relative;
+    }
+
+    .report-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <div>
+        <h1 class="display-6 fw-bold text-dark">Analytics Center</h1>
+        <p class="text-muted">Real-time reports and organizational intelligence.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('export_reports_csv') }}" class="btn btn-outline-primary"
+            style="border-radius: 12px; transition: all 0.3s ease; border-width: 2px;">
+            <i class="fas fa-file-export me-2"></i> Export CSV
+        </a>
+        <button class="btn btn-primary-custom" onclick="window.print()" style="transition: all 0.3s ease;">
+            <i class="fas fa-print me-2"></i> Print Report
+        </button>
+    </div>
+</div>
+
+<div class="report-grid animate-fade-up">
+    <div class="report-stat-card">
+        <div class="report-stat-icon"><i class="fas fa-users"></i></div>
+        <h4 class="h2 fw-bold text-dark mb-1">{{ total_employees }}</h4>
+        <p class="text-muted small fw-bold mb-0">Total Staff</p>
+    </div>
+    <div class="report-stat-card">
+        <div class="report-stat-icon text-success" style="background: rgba(34, 197, 94, 0.1);"><i
+                class="fas fa-project-diagram"></i></div>
+        <h4 class="h2 fw-bold text-dark mb-1">{{ total_projects }}</h4>
+        <p class="text-muted small fw-bold mb-0">Active Projects</p>
+    </div>
+    <div class="report-stat-card">
+        <div class="report-stat-icon text-info" style="background: rgba(6, 182, 212, 0.1);"><i
+                class="fas fa-handshake"></i></div>
+        <h4 class="h2 fw-bold text-dark mb-1">{{ total_clients }}</h4>
+        <p class="text-muted small fw-bold mb-0">Total Clients</p>
+    </div>
+    <div class="report-stat-card">
+        <div class="report-stat-icon text-warning" style="background: rgba(245, 158, 11, 0.1);"><i
+                class="fas fa-money-check-alt"></i></div>
+        <h4 class="h2 fw-bold text-dark mb-1">₹{{ "{:,.0f}".format(payroll_total / 1000) }}k</h4>
+        <p class="text-muted small fw-bold mb-0">Monthly Payroll</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-lg-6 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="report-table-card h-100">
+            <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-umbrella-beach me-2 text-primary"></i> Leave
+                Distribution</h5>
+            <div class="chart-container">
+                <canvas id="leaveChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6 animate-fade-up" style="animation-delay: 0.2s;">
+        <div class="report-table-card h-100">
+            <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-receipt me-2 text-success"></i> Expense Analytics</h5>
+            <div class="chart-container">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="report-table-card animate-fade-up" style="animation-delay: 0.3s;">
+    <h5 class="fw-bold mb-4 text-dark"><i class="fas fa-calendar-check me-2 text-info"></i> Attendance Overview (Current
+        Month)</h5>
+    <div class="table-responsive">
+        <table class="table table-custom">
+            <thead>
+                <tr>
+                    <th>Report Metric</th>
+                    <th>Value</th>
+                    <th>Benchmark</th>
+                    <th>Trend</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="fw-bold text-dark">Average Daily Attendance</td>
+                    <td>{{ attendance_report }}</td>
+                    <td>{{ total_employees }}</td>
+                    <td class="text-success"><i class="fas fa-caret-up me-1"></i> +2.4%</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Punctuality Rate</td>
+                    <td>94.2%</td>
+                    <td>90%</td>
+                    <td class="text-success"><i class="fas fa-caret-up me-1"></i> +1.1%</td>
+                </tr>
+                <tr>
+                    <td class="fw-bold text-dark">Remote Work Ratio</td>
+                    <td>12.5%</td>
+                    <td>15%</td>
+                    <td class="text-danger"><i class="fas fa-caret-down me-1"></i> -3.2%</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Leave Chart
+        const leaveCtx = document.getElementById('leaveChart').getContext('2d');
+        new Chart(leaveCtx, {
+            type: 'doughnut',
+            data: {
+                labels: [{% for item in leave_report %}'{{ item._id }}',{% endfor %}],
+        datasets: [{
+            data: [{% for item in leave_report %}{{ item.count }}, {% endfor %}],
+        backgroundColor: ['#6366f1', '#22c55e', '#ef4444', '#f59e0b'],
+        borderWidth: 0
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+        });
+
+    // Expense Chart
+    const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+    new Chart(expenseCtx, {
+        type: 'bar',
+        data: {
+            labels: [{% for item in expense_report %}'{{ item._id }}',{% endfor %}],
+        datasets: [{
+            label: 'Total Amount (₹)',
+            data: [{% for item in expense_report %}{{ item.total }}, {% endfor %}],
+        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+        borderRadius: 10
+                }]
+            },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+        }
+    }
+        });
+    });
+</script>
+{% endblock %}

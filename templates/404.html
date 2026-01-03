@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}404 Not Found - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        min-height: 80vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 1rem;
+    }
+
+    .error-message {
+        font-size: 1.5rem;
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+
+    .btn-home {
+        background: linear-gradient(135deg, #2c3e50, #34495e);
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: all 0.3s ease;
+    }
+
+    .btn-home:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-code">404</div>
+    <h1 class="error-message">Oops! The page you're looking for was not found.</h1>
+    <p class="mb-4">It seems you've stumbled upon a missing link or entered an incorrect URL.</p>
+    <a href="{{ url_for('index') }}" class="btn btn-home">
+        <i class="fas fa-home me-2"></i>Back to Homepage
+    </a>
+</div>
+{% endblock %}

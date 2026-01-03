@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .settings-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.15);
+        border-radius: 20px;
+        padding: 2.5rem;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .settings-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .settings-section-title i {
+        color: #6366f1;
+    }
+
+    .form-switch .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        cursor: pointer;
+    }
+
+    .form-switch .form-check-input:checked {
+        background-color: #6366f1;
+        border-color: #6366f1;
+    }
+
+    .theme-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+
+    .theme-option {
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .theme-option:hover {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.02);
+    }
+
+    .theme-option.active {
+        border-color: #6366f1;
+        background: rgba(99, 102, 241, 0.05);
+        position: relative;
+    }
+
+    .theme-option.active::after {
+        content: "\f058";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: white;
+        color: #6366f1;
+        border-radius: 50%;
+        font-size: 1.25rem;
+    }
+
+    .preview-box {
+        height: 40px;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="mb-5 animate-fade-up">
+        <h1 class="display-6 fw-bold text-dark">System Settings</h1>
+        <p class="text-muted">Customize your platform experience and security preferences.</p>
+    </div>
+
+    <form action="{{ url_for('update_settings') }}" method="POST">
+        <div class="settings-card animate-fade-up" style="animation-delay: 0.1s;">
+            <h3 class="settings-section-title">
+                <i class="fas fa-palette"></i> Appearance
+            </h3>
+            <p class="small text-muted mb-4">Choose how HRMS looks on your device.</p>
+
+            <div class="theme-selector">
+                <div class="theme-option active" onclick="selectTheme('light')">
+                    <div class="preview-box" style="background: #f8f9ff; border: 1px solid #e2e8f0;"></div>
+                    <span class="small fw-bold">Light Mode</span>
+                    <input type="radio" name="theme" value="light" checked hidden>
+                </div>
+                <div class="theme-option" onclick="selectTheme('dark')">
+                    <div class="preview-box" style="background: #1e293b; border: 1px solid #334155;"></div>
+                    <span class="small fw-bold">Dark Mode</span>
+                    <input type="radio" name="theme" value="dark" hidden>
+                </div>
+                <div class="theme-option" onclick="selectTheme('system')">
+                    <div class="preview-box"
+                        style="background: linear-gradient(90deg, #f8f9ff 50%, #1e293b 50%); border: 1px solid #e2e8f0;">
+                    </div>
+                    <span class="small fw-bold">Auto</span>
+                    <input type="radio" name="theme" value="system" hidden>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card animate-fade-up" style="animation-delay: 0.2s;">
+            <h3 class="settings-section-title">
+                <i class="fas fa-bell"></i> Notifications
+            </h3>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h6 class="mb-0 fw-bold">Push Notifications</h6>
+                    <small class="text-muted">Receive alerts for leave approvals and attendance.</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="notifications" id="notifSwitch" checked>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="mb-0 fw-bold">Email Alerts</h6>
+                    <small class="text-muted">Get security alerts and monthly payroll reports via email.</small>
+                </div>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" name="email_alerts" id="emailSwitch" checked>
+                </div>
+            </div>
+        </div>
+
+        <div class="settings-card animate-fade-up" style="animation-delay: 0.3s;">
+            <h3 class="settings-section-title">
+                <i class="fas fa-lock"></i> Security
+            </h3>
+
+            <button type="button" class="btn btn-outline-primary w-100 mb-3"
+                style="border-radius: 12px; padding: 0.75rem;">
+                <i class="fas fa-key me-2"></i> Change Account Password
+            </button>
+            <button type="button" class="btn btn-outline-danger w-100" style="border-radius: 12px; padding: 0.75rem;">
+                <i class="fas fa-shield-alt me-2"></i> Enable Two-Factor Authentication
+            </button>
+        </div>
+
+        <div class="d-grid animate-fade-up" style="animation-delay: 0.4s;">
+            <button type="submit" class="btn btn-primary-custom" style="padding: 1rem; font-size: 1.1rem;">
+                Save Changes & Apply
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function selectTheme(theme) {
+        document.querySelectorAll('.theme-option').forEach(opt => {
+            opt.classList.remove('active');
+            opt.querySelector('input').checked = false;
+        });
+
+        const selected = document.querySelector(`.theme-option input[value="${theme}"]`).parentElement;
+        selected.classList.add('active');
+        selected.querySelector('input').checked = true;
+    }
+</script>
+{% endblock %}

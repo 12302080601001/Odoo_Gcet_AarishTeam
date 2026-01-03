@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Employee Performance - HRMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 animate-fade-up">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="mb-0"><i class="fas fa-microchip me-2"></i> Performance Analysis Node</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Sector</th>
+                                <th>Status</th>
+                                <th>Trend</th>
+                                <th class="text-end">Command</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in employees %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar-sm me-3"
+                                            style="border: 1px solid var(--primary-color);">
+                                            {{ emp.profile.full_name[0] }}
+                                        </div>
+                                        <div class="text-white fw-bold">{{ emp.profile.full_name }}</div>
+                                    </div>
+                                </td>
+                                <td><small class="text-muted">{{ emp.profile.department or 'Core' }}</small></td>
+                                <td>
+                                    <span class="badge border border-primary text-primary px-3"
+                                        style="font-size: 0.65rem;">ACTIVE</span>
+                                </td>
+                                <td>
+                                    <i class="fas fa-project-diagram text-primary opacity-50"></i>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-primary-custom" data-bs-toggle="modal"
+                                        data-bs-target="#reviewModal{{ emp.id }}">
+                                        Initialize Review
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="card-custom p-4">
+            <h4 class="section-title mb-4"><i class="fas fa-satellite-dish text-primary me-2"></i> Core Metrics</h4>
+            <div class="mb-4">
+                <small class="text-muted d-block mb-1 text-uppercase">System Efficiency</small>
+                <div class="d-flex align-items-center">
+                    <h2 class="mb-0 me-2 text-white" style="letter-spacing: -2px;">0.98</h2>
+                    <div class="text-primary small">
+                        <i class="fas fa-check-double"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-4">
+                <small class="text-muted d-block mb-3 text-uppercase">Vector Distribution</small>
+                <div class="progress bg-dark mb-3" style="height: 4px; border-radius: 0;">
+                    <div class="progress-bar bg-primary" style="width: 85%"></div>
+                    <div class="progress-bar bg-info" style="width: 10%"></div>
+                    <div class="progress-bar bg-danger" style="width: 5%"></div>
+                </div>
+                <div class="d-flex justify-content-between x-small text-muted"
+                    style="font-size: 0.6rem; letter-spacing: 1px;">
+                    <span class="text-primary">OPTIMAL (85%)</span>
+                    <span>STABLE</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% for emp in employees %}
+<div class="modal fade" id="reviewModal{{ emp.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content card-custom border-0 shadow-lg" style="background: var(--dark-bg);">
+            <div class="modal-header border-bottom border-secondary p-4">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-terminal text-primary me-2"></i> DATA_ENTRY: {{ emp.profile.full_name }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('add_performance_review') }}" method="POST">
+                <input type="hidden" name="employee_id" value="{{ emp.id }}">
+                <div class="modal-body p-4">
+                    <div class="mb-4">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Performance Vector</label>
+                        <select name="rating" class="form-control form-control-custom" required>
+                            <option value="5">LVL_5: CRITICAL IMPACT</option>
+                            <option value="4">LVL_4: SUPERIOR</option>
+                            <option value="3" selected>LVL_3: NOMINAL</option>
+                            <option value="2">LVL_2: SUB-NOMINAL</option>
+                            <option value="1">LVL_1: FAILURE</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase">Analytical Summary</label>
+                        <textarea name="feedback" class="form-control form-control-custom" rows="5"
+                            placeholder="Input log data..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top border-secondary p-4">
+                    <button type="button" class="btn btn-link text-muted text-decoration-none"
+                        data-bs-dismiss="modal">ABORT</button>
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        COMMIT DATA
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

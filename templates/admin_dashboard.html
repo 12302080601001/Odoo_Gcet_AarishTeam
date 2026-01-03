@@ -1,0 +1,269 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - HRMS{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 249, 255, 0.98));
+        border-radius: 20px;
+        padding: 3rem;
+        margin-bottom: 2.5rem;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        box-shadow: 0 8px 30px rgba(99, 102, 241, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+    }
+
+    .dashboard-header::after {
+        content: "ADMIN CONTROL";
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 0.65rem;
+        color: #6366f1;
+        opacity: 0.6;
+        letter-spacing: 3px;
+        font-weight: 700;
+    }
+
+    .welcome-text {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+    }
+
+    .welcome-subtitle {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        border-radius: 16px;
+        padding: 1.5rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 12px 40px rgba(99, 102, 241, 0.15);
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .recent-activity {
+        border-radius: 20px;
+        padding: 2rem;
+        height: 100%;
+    }
+
+    .announcement-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid #6366f1;
+        transition: all 0.3s ease;
+    }
+
+    .announcement-card:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+        transform: translateX(5px);
+    }
+
+    .leave-item {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.03), rgba(139, 92, 246, 0.03));
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .leave-item:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(139, 92, 246, 0.06));
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.1);
+    }
+
+    .user-avatar {
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header animate-fade-up">
+    <div class="welcome-text">
+        <i class="fas fa-crown gradient-text"></i> Admin Panel
+    </div>
+    <div class="welcome-subtitle">
+        Manager View | Quick Insights & Operational Control
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card animate-fade-up hover-glow" style="animation-delay: 0.1s;">
+        <div class="stat-icon primary stat-glow-primary d-flex align-items-center justify-content-center">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-value">{{ total_employees }}</div>
+        <div class="stat-label">Total Staff</div>
+    </div>
+
+    <div class="stat-card animate-fade-up hover-glow" style="animation-delay: 0.2s;">
+        <div class="stat-icon warning stat-glow-warning d-flex align-items-center justify-content-center">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{ pending_leaves }}</div>
+        <div class="stat-label">Pending Approvals</div>
+    </div>
+
+    <div class="stat-card success animate-fade-up hover-glow" style="animation-delay: 0.3s;">
+        <div class="stat-icon success stat-glow-success d-flex align-items-center justify-content-center">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-value">{{ today_attendance }}</div>
+        <div class="stat-label">Present Today</div>
+    </div>
+
+    <div class="stat-card info animate-fade-up hover-glow" style="animation-delay: 0.4s;">
+        <div class="stat-icon info stat-glow-primary d-flex align-items-center justify-content-center">
+            <i class="fas fa-user-minus"></i>
+        </div>
+        <div class="stat-value">{{ total_employees - today_attendance }}</div>
+        <div class="stat-label">Absentees</div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column: Leave Requests -->
+    <div class="col-lg-8 mb-4 animate-fade-up" style="animation-delay: 0.5s;">
+        <div class="recent-activity glass-card">
+            <h3 class="section-title mb-4">
+                <i class="fas fa-paper-plane gradient-text"></i> Pending Leave Requests
+            </h3>
+
+            {% if recent_leaves %}
+            {% for leave in recent_leaves %}
+            {% if leave.status == 'Pending' %}
+            <div class="leave-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="user-avatar" style="width: 50px; height: 50px;">
+                            {{ leave.user.profile.full_name[0].upper() }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0" style="color: #1e293b; font-weight: 700;">{{ leave.user.profile.full_name
+                                }}</h6>
+                            <small class="text-muted">{{ leave.leave_type }} | {{ leave.start_date | date_format('%d
+                                %b') }}
+                                - {{ leave.end_date | date_format('%d %b') }}</small>
+                        </div>
+                    </div>
+                    <span class="badge-custom badge-pending">Pending</span>
+                </div>
+                <div class="mt-3 p-2 bg-dark rounded border border-secondary">
+                    <small class="text-muted d-block">Reason:</small>
+                    <p class="mb-0 small">{{ leave.reason }}</p>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <form method="POST" action="{{ url_for('approve_leave', leave_id=leave.id) }}" class="flex-fill">
+                        <button type="submit" class="btn btn-success-custom w-100 btn-sm">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('reject_leave', leave_id=leave.id) }}" class="flex-fill">
+                        <button type="submit" class="btn btn-danger-custom w-100 btn-sm">Reject</button>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted">No pending requests</p>
+            </div>
+            {% endif %}
+
+            <div class="text-center mt-3">
+                <a href="{{ url_for('leave') }}" class="btn btn-link text-primary text-decoration-none">View All
+                    Requests</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Announcements & Quick Actions -->
+    <div class="col-lg-4 mb-4">
+        <div class="glass-card p-4 mb-4 animate-fade-up" style="animation-delay: 0.6s;">
+            <h4 class="section-title mb-3" style="font-size: 1.2rem;">
+                <i class="fas fa-bullhorn gradient-text"></i> Post Announcement
+            </h4>
+            <form action="{{ url_for('add_announcement') }}" method="POST">
+                <input type="text" name="title" class="form-control form-control-custom mb-2" placeholder="Title"
+                    required>
+                <textarea name="content" class="form-control form-control-custom mb-3" placeholder="Message content..."
+                    rows="3" required></textarea>
+                <button type="submit" class="btn btn-primary-custom w-100">Broadcast</button>
+            </form>
+        </div>
+
+        <div class="glass-card p-4 mb-4 animate-fade-up" style="animation-delay: 0.7s;">
+            <h4 class="section-title mb-3" style="font-size: 1.2rem;">
+                <i class="fas fa-history gradient-text"></i> Recent Posts
+            </h4>
+            {% for ann in announcements %}
+            <div class="announcement-card">
+                <h6 class="mb-1" style="color: #1e293b; font-weight: 700;">{{ ann.title }}</h6>
+                <p class="mb-0 small text-muted">{{ ann.content[:60] }}...</p>
+                <small class="text-primary" style="font-size: 0.7rem;">{{ ann.created_at | date_format('%d %b, %H:%M')
+                    }}</small>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="glass-card p-4 animate-fade-up"
+            style="animation-delay: 0.8s; border: 1px solid var(--primary-color);">
+            <h4 class="section-title mb-3" style="font-size: 1.2rem;">
+                <i class="fas fa-chart-pie gradient-text"></i> Workforce Analytics
+            </h4>
+            <p class="small text-muted mb-3">Real-time organizational insights and performance metrics.</p>
+            <a href="{{ url_for('analytics') }}" class="btn btn-primary-custom btn-sm w-100">
+                <i class="fas fa-external-link-alt"></i> Command Center
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

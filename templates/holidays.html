@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Holidays - HRMS{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 animate-fade-up">
+        <div class="card-custom">
+            <div class="card-header-custom">
+                <h3 class="mb-0"><i class="fas fa-calendar-star gradient-text"></i> Company Holidays</h3>
+            </div>
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="table table-custom">
+                        <thead>
+                            <tr>
+                                <th>Holiday Name</th>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if holidays %}
+                            {% for h in holidays %}
+                            <tr>
+                                <td><strong style="color: #1e293b; font-weight: 700;">{{ h.name }}</strong></td>
+                                <td>{{ h.date | date_format('%d %b %Y') }}</td>
+                                <td>{{ h.date | date_format('%A') }}</td>
+                                <td>
+                                    {% if h.date > now %}
+                                    <span class="badge bg-success">Upcoming</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">Passed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No holidays listed yet.</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.role == 'HR' %}
+    <div class="col-lg-4 animate-fade-up" style="animation-delay: 0.1s;">
+        <div class="glass-card p-4">
+            <h4 class="section-title mb-3"><i class="fas fa-plus-circle gradient-text"></i> Add Holiday</h4>
+            <form action="{{ url_for('add_holiday') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Holiday Name</label>
+                    <input type="text" name="name" class="form-control form-control-custom"
+                        placeholder="e.g. Diwali Festival" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-muted small">Date</label>
+                    <input type="date" name="date" class="form-control form-control-custom" required>
+                </div>
+                <button type="submit" class="btn btn-primary-custom w-100">Add to Calendar</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

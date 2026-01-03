@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Payroll Management - HRMS{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="display-6 fw-bold text-dark"><i class="fas fa-money-bill-wave me-2"></i>Payroll Management</h1>
+        <p class="text-muted">Manage employee salaries and compensation</p>
+    </div>
+    {% if current_month %}
+    <span class="badge bg-primary-subtle text-primary px-3 py-2" style="font-size: 0.875rem;">
+        <i class="fas fa-calendar me-1"></i>{{ current_month }}
+    </span>
+    {% endif %}
+</div>
+
+<div class="card-custom animate-fade-up">
+    <div class="card-body p-0">
+        {% if employees %}
+        <div class="table-responsive">
+            <table class="table table-custom mb-0">
+                <thead>
+                    <tr>
+                        <th class="ps-4">Employee</th>
+                        <th>Designation</th>
+                        <th>Basic Salary</th>
+                        <th>Allowances</th>
+                        <th>Deductions</th>
+                        <th>Net Salary</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for employee in employees %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar-sm me-3">
+                                    {{ employee.profile.full_name[0].upper() }}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ employee.profile.full_name }}</div>
+                                    <small class="text-muted">{{ employee.employee_id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark">{{ employee.profile.designation or 'Employee'
+                                }}</span>
+                        </td>
+                        <td class="text-dark fw-bold">₹{{ "{:,.0f}".format(employee.profile.basic_salary or 0) }}</td>
+                        <td class="text-success">₹{{ "{:,.0f}".format(employee.profile.allowances or 0) }}</td>
+                        <td class="text-danger">₹{{ "{:,.0f}".format(employee.profile.deductions or 0) }}</td>
+                        <td class="fw-bold text-primary">
+                            ₹{{ "{:,.0f}".format(employee.profile.net_salary or 0) }}
+                        </td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-primary-custom" data-bs-toggle="modal"
+                                data-bs-target="#payrollModal{{ employee.id }}">
+                                <i class="fas fa-edit me-1"></i>Edit
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users" style="font-size: 4rem; color: #cbd5e1;"></i>
+            <p class="mt-3 text-muted">No employees found</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modals -->
+{% for employee in employees %}
+<div class="modal fade" id="payrollModal{{ employee.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-money-bill-wave text-primary me-2"></i>Edit Payroll: {{ employee.profile.full_name
+                    }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('update_payroll', employee_id=employee.id) }}">
+                <div class="modal-body p-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-muted">Basic Salary (₹)</label>
+                            <input type="number" name="basic_salary" class="form-control form-control-custom"
+                                value="{{ employee.profile.basic_salary or 0 }}" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Allowances (₹)</label>
+                            <input type="number" name="allowances" class="form-control form-control-custom"
+                                value="{{ employee.profile.allowances or 0 }}" step="0.01" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold text-muted">Deductions (₹)</label>
+                            <input type="number" name="deductions" class="form-control form-control-custom"
+                                value="{{ employee.profile.deductions or 0 }}" step="0.01" min="0">
+                        </div>
+                        <div class="col-12">
+                            <div class="alert alert-info border-0">
+                                <small class="fw-bold">Net Salary Calculation:</small><br>
+                                <small>Basic Salary + Allowances - Deductions = Net Salary</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-link text-muted" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-custom px-4">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

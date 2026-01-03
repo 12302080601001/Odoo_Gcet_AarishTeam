@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Verify Payslip - HRMS{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5">
+    <div class="card-custom mx-auto" style="max-width: 500px; padding: 3rem;">
+        <div class="mb-4">
+            <i class="fas fa-check-circle fa-5x text-success animate-bounce"></i>
+        </div>
+        <h2 class="text-white mb-3">Authentic Payslip Verified</h2>
+        <p class="text-muted mb-4">The payroll record associated with code <strong>{{ code }}</strong> has been verified
+            as authentic and issued by HRMS Corporate Systems.</p>
+
+        <div class="verification-details bg-dark rounded p-3 mb-4 text-start">
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Status:</span>
+                <span class="text-success fw-bold">Verified</span>
+            </div>
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Issue Authority:</span>
+                <span class="text-white">HRMS Global Finance</span>
+            </div>
+            <div class="d-flex justify-content-between">
+                <span class="text-muted">Verification Time:</span>
+                <span class="text-white">{{ now | date_format('%d %b %Y, %H:%M') }}</span>
+            </div>
+        </div>
+
+        <a href="{{ url_for('login') }}" class="btn btn-primary-custom w-100">
+            Back to Portal
+        </a>
+    </div>
+</div>
+{% endblock %}

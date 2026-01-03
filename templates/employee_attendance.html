@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}My Attendance - HRMS{% endblock %}
+
+{% block content %}
+<div class="card-custom">
+    <div class="card-header-custom d-flex justify-content-between align-items-center">
+        <h3 class="mb-0">
+            <i class="fas fa-calendar-check"></i> My Attendance
+        </h3>
+        <div class="d-flex gap-2">
+            {% if not today_checked_in %}
+            <form method="POST" action="{{ url_for('check_in') }}" style="margin: 0;">
+                <button type="submit" class="btn btn-success-custom">
+                    <i class="fas fa-sign-in-alt"></i> Check In
+                </button>
+            </form>
+            {% elif not today_checked_out %}
+            <form method="POST" action="{{ url_for('check_out') }}" style="margin: 0;">
+                <button type="submit" class="btn btn-danger-custom">
+                    <i class="fas fa-sign-out-alt"></i> Check Out
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-body" style="padding: 2rem;">
+        {% if attendance_records %}
+        <div class="table-responsive">
+            <table class="table table-custom">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Check In</th>
+                        <th>Check Out</th>
+                        <th>Hours</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance_records %}
+                    <tr>
+                        <td>{{ record.date | date_format('%d %b %Y') }}</td>
+                        <td>{{ record.check_in | date_format('%I:%M %p') if record.check_in else '-' }}</td>
+                        <td>{{ record.check_out | date_format('%I:%M %p') if record.check_out else '-' }}</td>
+                        <td>
+                            {% if record.check_in and record.check_out %}
+                            {% set hours = ((record.check_out.hour * 60 + record.check_out.minute) -
+                            (record.check_in.hour * 60 + record.check_in.minute)) / 60 %}
+                            {{ "%.1f"|format(hours) }} hrs
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span
+                                class="status-badge status-{{ record.status.lower().replace('-', '').replace(' ', '') }}">
+                                {{ record.status }}
+                            </span>
+                        </td>
+                        <td>{{ record.remarks or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-calendar-times" style="font-size: 4rem; color: var(--text-muted); opacity: 0.3;"></i>
+            <p class="mt-3" style="color: var(--text-muted);">No attendance records found for this month</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
