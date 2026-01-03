@@ -4,7 +4,7 @@
 A comprehensive, modern HRMS built with Flask, Bootstrap, and SQLite. Features role-based access control, attendance tracking, leave management, and payroll management.
 
 ## 🌟 Features
-
+       
 ### Authentication & Authorization
 - ✅ Secure sign up and sign in
 - ✅ Role-based access (Employee / HR Admin)
